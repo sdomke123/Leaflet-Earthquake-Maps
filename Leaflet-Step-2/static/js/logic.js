@@ -1,9 +1,10 @@
+// Data
 var url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson"
 var url2 = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json"
-
+// Function to create map
 function createMap(quakeSpot, plateLines) {
 
-    // Create tile layer to act as map background
+    // Create tile layers to act as map backgrounds
     var light = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
         attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
         id: "mapbox/streets-v11",
@@ -16,13 +17,13 @@ function createMap(quakeSpot, plateLines) {
         accessToken: API_KEY
     });
 
-    // Create a base layer to hold the light map layer
+    // Create a base layer to hold the light map and satellite map layers
     var baseMaps = {
         Light: light,
         Satellite: satellite
     };
 
-    // Create an overlay layer to hold to quakeSpots layer
+    // Create an overlay layer to hold to quakeSpots and plateLines layers
     var overlayMaps = {
         "Earthquakes": quakeSpot,
         "Tectonic Plates": plateLines
@@ -37,7 +38,7 @@ function createMap(quakeSpot, plateLines) {
 
     // Create a layer control and pass in the layers
     L.control.layers(baseMaps, overlayMaps).addTo(myMap);
-
+    // Create the legend
     var legend = L.control({ position: 'bottomright' });
         legend.onAdd = function () {
         var div = L.DomUtil.create('div', 'info legend');
@@ -68,7 +69,7 @@ function createMap(quakeSpot, plateLines) {
     };
 
 function createMarkers(response) {
-    // Read in the earthquake data
+    // Assign features to a variable for easier access
     var earthquakes = response.features;
 
     // Initialize an empty array to hold the marker-bound earthquakes
@@ -78,6 +79,7 @@ function createMarkers(response) {
     for(var i=0; i < earthquakes.length; i++) {
         var quakeProperties = earthquakes[i].properties;
         var quakeLocation = earthquakes[i].geometry;
+        // Assign a color to a circle depending on the earthquake depth
         if(quakeLocation.coordinates[2] >= 0 && quakeLocation.coordinates[2] <= 10) {
             var setColor = "#3aeb34"
         } else if(quakeLocation.coordinates[2] > 10 && quakeLocation.coordinates[2] <= 30) {
@@ -91,6 +93,7 @@ function createMarkers(response) {
         } else {
             var setColor = "#f72f2f"
         }
+        // Assign a size to a circle depending on the earthquake magnitude
         if(quakeProperties.mag >= 4.5 && quakeProperties.mag <= 5) {
             var setRadius = 10
         } else if(quakeProperties.mag >= 5 && quakeProperties.mag <= 5.5) {
@@ -102,6 +105,7 @@ function createMarkers(response) {
         } else {
             var setRadius = 30
         }
+        // Create the circle markers
         var circles = L.circleMarker([quakeLocation.coordinates[1], quakeLocation.coordinates[0]], {
             color: "black",
             weight: 0.5,
@@ -111,10 +115,11 @@ function createMarkers(response) {
           }).bindPopup(quakeProperties.title)
         quakeMarkers.push(circles);
     }
-    
+    // Read in data set for tectonic plate boundaries and create map layer with L.geoJSON
     d3.json(url2, function(data) {
+        // Initialize createMap function passing in a layer of the circle markers and the plate boundaries
         createMap(L.layerGroup(quakeMarkers), L.geoJSON(data, {color: "yellow"}));
     });
 };
-
+// Start by reading in the data set for earthquakes and initializing the createMarkers function
 d3.json(url, createMarkers);
