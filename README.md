@@ -23,5 +23,5 @@ Data was pulled from the USGS site at https://earthquake.usgs.gov/earthquakes/fe
 
 ## Tools and Languages
 
-JavaScript, Leaflet.js
-HTML/CSS
+* JavaScript, Leaflet.js
+* HTML/CSS
