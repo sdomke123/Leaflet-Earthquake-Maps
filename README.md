@@ -1,4 +1,4 @@
-# Mapping Recent Earthquake Locations and Tectonic Plates with Leaflet.js
+# Mapping Earthquake Locations and Tectonic Plates
 
 ## Overview
 
